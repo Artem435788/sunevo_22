@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эволюция Солнца | Кликер</title>
+    <style>
+        body {
+            background-image: url('https://avatars.mds.yandex.net/i?id=476493bb16637b71e91cff846742698c_l-8311401-images-thumbs&n=13');
+            background-size: cover; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            position: relative;
+        }
+        #score {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: white;
+            background-color: gray;
+            border: 3px solid black;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #level {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: white;
+            background-color: gray;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid black;
+        }
+        #sun {
+            width: 250px;
+            cursor: pointer;
+            transition: transform 0.09s;
+        }
+        #progress-container {
+            width: 80%;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            margin: 20px 0;
+            height: 30px;
+            position: relative;
+        }
+        #progress {
+            height: 100%;
+            background-color: yellow;
+            border-radius: 5px; 
+            width: 0%;
+            transition: width 0.2s;
+        }
+        .coin {
+            position: absolute;
+            width: 50px;
+            animation: fly 1s forwards;
+        }
+        @keyframes fly {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+        }
+        .coin-message {
+            position: absolute;
+            color: gold;
+            font-size: 24px;
+            animation: message-fly 1s forwards;
+        }
+        @keyframes message-fly {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Очки: 0</div>
+    <div id="level">1</div> <!-- Счетчик уровней -->
+    <img id="sun" src="https://media.baamboozle.com/uploads/images/120428/1609947868_383231" alt="Солнце" />
+    <div id="progress-container">
+        <div id="progress"></div>
+    </div>
+    
+    <script>
+        let score = 0; // Инициализация счета
+        const sunImg = document.getElementById('sun');
+        const progressBar = document.getElementById('progress');
+        const scoreDisplay = document.getElementById('score');
+        const levelDisplay = document.getElementById('level'); // Счетчик уровней
+
+        // Определяем пороги для уровней
+        const levelThresholds = [30, 50, 100];
+        let currentLevel = 0;
+
+        // Инициализация
+        scoreDisplay.innerText = "Очки: " + score;
+
+        function createCoin() {
+            const coin = document.createElement('img');
+            coin.src = 'https://bumper-stickers.ru/43047-thickbox_default/dengi.jpg';
+            coin.classList.add('coin');
+            document.body.appendChild(coin);
+
+            const sunRect = sunImg.getBoundingClientRect();
+            coin.style.left = `${sunRect.left + sunRect.width / 2 - 25}px`;
+            coin.style.top = `${sunRect.top}px`;
+
+            setTimeout(() => {
+                coin.remove();
+            }, 1000);
+        }
+
+        function showMessage() {
+            const message = document.createElement('div');
+            message.classList.add('coin-message');
+            message.innerText = "";
+            document.body.appendChild(message);
+
+            const sunRect = sunImg.getBoundingClientRect();
+            message.style.left = `${sunRect.left + sunRect.width / 2 - 10}px`;
+            message.style.top = `${sunRect.top - 30}px`;
+
+            setTimeout(() => {
+                message.remove();
+            }, 1000);
+        }
+
+        function updateProgress() {
+            if (currentLevel < levelThresholds.length) {
+                const lowerThreshold = currentLevel > 0 ? levelThresholds[currentLevel - 1] : 0;
+                const upperThreshold = levelThresholds[currentLevel];
+                const progressPercentage = ((score - lowerThreshold) / (upperThreshold - lowerThreshold)) * 100;
+
+                // Ограничиваем процент до 100%
+                progressBar.style.width = Math.min(progressPercentage, 100) + '%';
+            }
+        }
+
+        document.getElementById('sun').addEventListener('click', function() {
+            score += 1;
+
+            if (currentLevel < levelThresholds.length && score >= levelThresholds[currentLevel]) {
+                currentLevel++;
+                levelDisplay.innerText = currentLevel + 1; // Обновление счетчика уровней
+                // Меняем изображение солнца только при увеличении уровня
+                if (currentLevel === 1) {
+                    sunImg.src = 'https://i.pinimg.com/originals/73/8b/df/738bdfe717b6026a70c88d41d2666e68.png';
+                } else if (currentLevel === 2) {
+                    sunImg.src = 'https://fbi.cults3d.com/uploaders/20952150/illustration-file/22476746-7883-430e-9ee8-613ad2326143/pngwing.com-2022-02-09T121715.466.png';
+                }
+
+                progressBar.style.width = '0%'; // Сброс прогресс-бара
+            }
+
+            scoreDisplay.innerText = "Очки: " + score;
+
+            // Обновление прогресс-бара
+            updateProgress();
+
+            createCoin();
+            showMessage();
+
+            this.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 50);
+        });
+    </script>
+</body>
+</html>
